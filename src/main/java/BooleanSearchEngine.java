@@ -9,7 +9,7 @@ import java.util.*;
 
 public class BooleanSearchEngine implements SearchEngine {
 
-    private List<PageEntry> pageEntries = new ArrayList<>();
+    private List<PageEntryTwo> listPage = new ArrayList<>();
     private Map<String, List<PageEntry>> freqs1 = new HashMap<>();
 
     public BooleanSearchEngine(File pdfsDir) throws IOException {
@@ -19,7 +19,9 @@ public class BooleanSearchEngine implements SearchEngine {
             for (File item : pdfsDir.listFiles()) {
 
                 var doc = new PdfDocument(new PdfReader(item));
+
                 for (int i = 1; i <= doc.getNumberOfPages(); i++) {
+
                     var text = PdfTextExtractor.getTextFromPage(doc.getPage(i));
                     var words = text.split("\\P{IsAlphabetic}+");
                     Map<String, Integer> freqs = new HashMap<>();// мапа, где ключом будет слово, а значением - частота
@@ -30,31 +32,26 @@ public class BooleanSearchEngine implements SearchEngine {
                         }
                         word = word.toLowerCase();
                         freqs.put(word, freqs.getOrDefault(word, 0) + 1);
+
                     }
-                    List<PageEntry> listPage = new ArrayList<>();
 
                     for (Map.Entry<String, Integer> freqsWord : freqs.entrySet()) {
-                        if (freqsWord.getKey().isEmpty()) {
-                            continue;
-                        }
-                        listPage.add(new PageEntry(item.getName(), i, freqsWord.getValue()));
-                        freqs1.put(freqsWord.getKey(),listPage);
-
+                        List<PageEntry> pageEntries = new ArrayList<>();
+                        pageEntries.add(new PageEntry(item.getName(), i, freqsWord.getValue()));
+                        freqs1.put(freqsWord.getKey(),pageEntries);
                     }
-//                    for (Map.Entry<String, Integer> freqsWord : freqs.entrySet()) {
-//
-//                    }
 
                 }
-            }
 
-            // прочтите тут все pdf и сохраните нужные данные,
-            // тк во время поиска сервер не должен уже читать файлы
+
+            }
         }
+        System.out.println(freqs1.toString());
     }
 
     @Override
     public List<PageEntry> search(String word) {
+        freqs1.get(word);
         return Collections.emptyList();
     }
 }
