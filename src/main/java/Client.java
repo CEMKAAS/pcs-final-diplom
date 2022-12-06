@@ -19,6 +19,7 @@ public class Client {
             System.out.println(serverBegin);
 
             String word = scanner.nextLine();
+            word = word.toLowerCase();
             out.println(word);
             String output = in.readLine();
             System.out.println(output);
