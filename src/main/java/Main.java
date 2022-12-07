@@ -7,8 +7,7 @@ import java.net.Socket;
 public class Main {
     public static void main(String[] args) throws Exception {
 
-
-        try (ServerSocket serverSocket = new ServerSocket(8989);) {
+        try (ServerSocket serverSocket = new ServerSocket(8989)) {
             while (true) {
                 try (
                         Socket socket = serverSocket.accept();

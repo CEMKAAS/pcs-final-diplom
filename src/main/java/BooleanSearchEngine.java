@@ -46,45 +46,60 @@ public class BooleanSearchEngine implements SearchEngine {
     public List<PageEntry> search(String word) {
         List<String> stopWord = new ArrayList<>();
         List<PageEntry> allWord = new ArrayList<>();
-        List<PageEntry> endWord = new ArrayList<>();
-        try (BufferedReader textFile = new BufferedReader(new FileReader("stop-ru.txt"))) {
+        List<PageEntry> allWord2 = new ArrayList<>();
 
+        try (BufferedReader textFile = new BufferedReader(new FileReader("stop-ru.txt"))) {
             String s;
             while ((s = textFile.readLine()) != null) {
                 stopWord.add(s);
             }
+
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        String[] wordMassive = word.toLowerCase().split("\\P{IsAlphabetic}+");
         List<String> list = new ArrayList<>();
-        String[] wordMassive = word.split(" ");
         for (String wordSearch : wordMassive) {
-            for (String wordStopList : stopWord) {
-                if (!wordSearch.equals(wordStopList)) {
-                    continue;
-                }
+            if (!stopWord.contains(wordSearch)) {
                 list.add(wordSearch);
             }
         }
 
-        for (Map.Entry<String, List<PageEntry>> freqsWord1 : pageEntryAll.entrySet()) {
-            for (String list1 : list) {
-                allWord = pageEntryAll.get(list1);
-            }
+        for (String list1 : list) {
+            allWord2.addAll(pageEntryAll.get(list1));
+            break;
         }
 
-        for (PageEntry o : allWord) {
-            for (PageEntry a : endWord) {
-                if (o.getPdfName().equals(a.getPdfName()) && o.getCount() == a.getCount()) {
-                    endWord.add(new PageEntry(o.getPdfName(), o.getPage(), (o.getCount() + a.getCount())));
-                    break;
+        int value = -1;
+        for (String list1 : list) {
+            if (value == -1) {
+                allWord = pageEntryAll.get(list1);
+                allWord.clear();
+                value++;
+                continue;
+            }
+            allWord = pageEntryAll.get(list1);
+            for (PageEntry o : allWord) {
+                value = 0;
+                for (PageEntry a : allWord2) {
+                    if (o.getPdfName().equals(a.getPdfName()) && o.getPage() == a.getPage()) {
+                        allWord2.remove(a);
+                        allWord2.add(new PageEntry(a.getPdfName(), a.getPage(), (o.getCount() + a.getCount())));
+                        value++;
+                        break;
+                    }
+                }
+                if (value == 0) {
+                    allWord2.add(o);
                 }
             }
         }
-        if (endWord != null) {
-            return endWord;
+
+        allWord2.sort(PageEntry::compareTo);
+        if (allWord2 != null) {
+            return allWord2 ;
         } else {
             return Collections.emptyList();
         }
