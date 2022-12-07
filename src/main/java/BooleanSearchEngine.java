@@ -45,8 +45,8 @@ public class BooleanSearchEngine implements SearchEngine {
     @Override
     public List<PageEntry> search(String word) {
         List<String> stopWord = new ArrayList<>();
+        List<PageEntry> listNoFirstWord = new ArrayList<>();
         List<PageEntry> allWord = new ArrayList<>();
-        List<PageEntry> allWord2 = new ArrayList<>();
 
         try (BufferedReader textFile = new BufferedReader(new FileReader("stop-ru.txt"))) {
             String s;
@@ -68,38 +68,38 @@ public class BooleanSearchEngine implements SearchEngine {
         }
 
         for (String list1 : list) {
-            allWord2.addAll(pageEntryAll.get(list1));
+            allWord.addAll(pageEntryAll.get(list1));
             break;
         }
 
         int value = -1;
         for (String list1 : list) {
             if (value == -1) {
-                allWord = pageEntryAll.get(list1);
-                allWord.clear();
+                listNoFirstWord = pageEntryAll.get(list1);
+                listNoFirstWord.clear();
                 value++;
                 continue;
             }
-            allWord = pageEntryAll.get(list1);
-            for (PageEntry o : allWord) {
+            listNoFirstWord = pageEntryAll.get(list1);
+            for (PageEntry o : listNoFirstWord) {
                 value = 0;
-                for (PageEntry a : allWord2) {
-                    if (o.getPdfName().equals(a.getPdfName()) && o.getPage() == a.getPage()) {
-                        allWord2.remove(a);
-                        allWord2.add(new PageEntry(a.getPdfName(), a.getPage(), (o.getCount() + a.getCount())));
+                for (PageEntry o1 : allWord) {
+                    if (o.getPdfName().equals(o1.getPdfName()) && o.getPage() == o1.getPage()) {
+                        allWord.remove(o1);
+                        allWord.add(new PageEntry(o1.getPdfName(), o1.getPage(), (o.getCount() + o1.getCount())));
                         value++;
                         break;
                     }
                 }
                 if (value == 0) {
-                    allWord2.add(o);
+                    allWord.add(o);
                 }
             }
         }
 
-        allWord2.sort(PageEntry::compareTo);
-        if (allWord2 != null) {
-            return allWord2 ;
+        allWord.sort(PageEntry::compareTo);
+        if (allWord != null) {
+            return allWord;
         } else {
             return Collections.emptyList();
         }

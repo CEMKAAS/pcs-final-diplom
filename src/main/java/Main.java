@@ -14,7 +14,7 @@ public class Main {
                         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 ) {
-                    out.println("Start!" + " Введите слово которое хотите найти");
+                    out.println("Start!" + " Введите слово или слова, которые хотите найти");
 
                     BooleanSearchEngine engine = new BooleanSearchEngine(new File("pdfs"));
 
