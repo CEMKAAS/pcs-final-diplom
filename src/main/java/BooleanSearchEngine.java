@@ -8,6 +8,7 @@ import java.util.*;
 public class BooleanSearchEngine implements SearchEngine {
 
     private Map<String, List<PageEntry>> pageEntryAll = new HashMap<>();
+    private Set<String> stopWord =new HashSet<>();
 
     public BooleanSearchEngine(File pdfsDir) throws IOException {
         if (pdfsDir.isDirectory()) {
@@ -26,7 +27,7 @@ public class BooleanSearchEngine implements SearchEngine {
                     }
                     for (Map.Entry<String, Integer> freqsWord : freqs.entrySet()) {
                         List<PageEntry> pageEntries = new ArrayList<>();
-                        if (pageEntryAll.get(freqsWord.getKey()) == null) {
+                        if (!pageEntryAll.containsKey(freqsWord.getKey())) {
                             pageEntries.add(new PageEntry(item.getName(), i, freqsWord.getValue()));
                             pageEntryAll.put(freqsWord.getKey(), pageEntries);
                         } else {
@@ -40,14 +41,6 @@ public class BooleanSearchEngine implements SearchEngine {
             }
         }
 
-    }
-
-    @Override
-    public List<PageEntry> search(String word) {
-        List<String> stopWord = new ArrayList<>();
-        List<PageEntry> listNoFirstWord = new ArrayList<>();
-        List<PageEntry> allWord = new ArrayList<>();
-
         try (BufferedReader textFile = new BufferedReader(new FileReader("stop-ru.txt"))) {
             String s;
             while ((s = textFile.readLine()) != null) {
@@ -59,28 +52,36 @@ public class BooleanSearchEngine implements SearchEngine {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public List<PageEntry> search(String word) {
+
+        List<PageEntry> listNoFirstWord = new ArrayList<>();
+        List<PageEntry> allWord = new ArrayList<>();
+
         String[] wordMassive = word.toLowerCase().split("\\P{IsAlphabetic}+");
-        List<String> list = new ArrayList<>();
+        List<String> wordsSearch = new ArrayList<>();
         for (String wordSearch : wordMassive) {
             if (!stopWord.contains(wordSearch)) {
-                list.add(wordSearch);
+                wordsSearch.add(wordSearch);
             }
         }
 
-        for (String list1 : list) {
-            allWord.addAll(pageEntryAll.get(list1));
+        for (String oneWordSearch : wordsSearch) {
+            allWord.addAll(pageEntryAll.get(oneWordSearch));
             break;
         }
 
         int value = -1;
-        for (String list1 : list) {
+        for (String oneWordSearch : wordsSearch) {
             if (value == -1) {
-                listNoFirstWord = pageEntryAll.get(list1);
+                listNoFirstWord = pageEntryAll.get(oneWordSearch);
                 listNoFirstWord.clear();
                 value++;
                 continue;
             }
-            listNoFirstWord = pageEntryAll.get(list1);
+            listNoFirstWord = pageEntryAll.get(oneWordSearch);
             for (PageEntry o : listNoFirstWord) {
                 value = 0;
                 for (PageEntry o1 : allWord) {
@@ -98,11 +99,11 @@ public class BooleanSearchEngine implements SearchEngine {
         }
 
         allWord.sort(PageEntry::compareTo);
+
         if (allWord != null) {
             return allWord;
         } else {
             return Collections.emptyList();
         }
     }
-
 }
